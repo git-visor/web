@@ -2,8 +2,7 @@ import {
   Database,
   Check,
   ChevronDown,
-  Loader2,
-  AlertCircle
+  Loader2
 } from 'lucide-react'
 import { ObjectDetail } from './ObjectDetail'
 import { ObjectGraph } from './ObjectGraph'
@@ -62,45 +61,86 @@ interface RepositoryData {
   name?: string
 }
 
+function getRawGithubUrl(url: string): string {
+  try {
+    const parsedUrl = new URL(url)
+    if (parsedUrl.hostname === 'github.com') {
+      const pathParts = parsedUrl.pathname.split('/').filter(Boolean)
+      // Remove blob/ or tree/ if present
+      const filteredParts = pathParts.filter(part => part !== 'blob' && part !== 'tree')
+      return `https://raw.githubusercontent.com/${filteredParts.join('/')}`
+    }
+    return url
+  } catch (e) {
+    console.error('Invalid URL provided:', url, e)
+    return url
+  }
+}
+
 export function ObjectDatabase(): JSX.Element {
   const [selectedObject, setSelectedObject] = useState<GitObject | null>(null)
   const [currentMockIndex, setCurrentMockIndex] = useState(0)
+
+  // Calculate initial loading state based on URL presence
+  const initialUrl = new URLSearchParams(window.location.search).get('url') || ''
+  const [urlInput, setUrlInput] = useState(initialUrl)
 
   // State for handling external URL data
   const [customData, setCustomData] = useState<RepositoryData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
+  // Extract fetch logic to reusable function
+  const loadFromUrl = async (url: string) => {
+    if (!url) return
+
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const rawUrl = getRawGithubUrl(url)
+      const res = await fetch(rawUrl)
+      if (!res.ok) throw new Error(`Failed to load: ${res.statusText}`)
+      
+      const data = await res.json()
+      // Basic validation
+      if (!data.objects || !Array.isArray(data.objects)) {
+        throw new Error('Invalid JSON format: missing "objects" array')
+      }
+      
+      setCustomData({
+        ...data,
+        name: data.repositoryName || 'External Repository'
+      })
+      // Automatically select the new custom dataset (last index after mocked data)
+      setCurrentMockIndex(mockDataList.length)
+    } catch (err: Error | unknown) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred')
+      console.error('Error fetching git objects:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const url = params.get('url')
-    console.log(url)
-
     if (url) {
-      fetch(url)
-        .then(async (res) => {
-          if (!res.ok) throw new Error(`Failed to load: ${res.statusText}`)
-          const data = await res.json()
-          // Basic validation could go here
-          if (!data.objects || !Array.isArray(data.objects)) {
-            throw new Error('Invalid JSON format: missing "objects" array')
-          }
-          setCustomData({
-            ...data,
-            name: data.repositoryName || 'External Repository' // Ensure it has a display name
-          })
-          // Automatically select the new custom dataset (last index after mocked data)
-          setCurrentMockIndex(mockDataList.length) 
-        })
-        .catch((err) => {
-          setError(err.message)
-          console.error('Error fetching git objects:', err)
-        })
-        .finally(() => {
-          setIsLoading(false)
-        })
+      setUrlInput(url)
+      loadFromUrl(url)
     }
   }, [])
+
+  const handleUrlSubmit = () => {
+    if (!urlInput.trim()) return
+
+    // Update URL without reloading
+    const newUrl = new URL(window.location.href)
+    newUrl.searchParams.set('url', urlInput)
+    window.history.pushState({}, '', newUrl)
+
+    loadFromUrl(urlInput)
+  }
 
   // Combine mock data and custom data
   const availableDatasets = useMemo(() => {
@@ -164,30 +204,39 @@ export function ObjectDatabase(): JSX.Element {
     )
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-[#1e1e1e] text-red-400">
-        <div className="flex flex-col items-center gap-4 max-w-md text-center p-6 border border-red-500/30 rounded-lg bg-red-500/10">
-          <AlertCircle className="w-10 h-10" />
-          <h2 className="text-xl font-semibold">Error Loading Data</h2>
-          <p className="text-sm text-gray-400">{error}</p>
-          <button 
-            onClick={() => window.location.search = ''}
-            className="mt-4 px-4 py-2 bg-[#252526] hover:bg-[#333] text-gray-300 rounded text-sm transition-colors"
-          >
-            Load Default Data
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="flex-1 flex bg-[#1e1e1e] overflow-hidden h-full">
       <div className="flex-1 border-r border-gray-700 flex flex-col overflow-hidden relative">
         <div className="p-4 border-b border-gray-700 flex-shrink-0 max-h-[50vh] overflow-y-auto">
           
           <div className="mb-4">
+            <div className="mb-4 space-y-3">
+              <h3 className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">
+                Load External JSON
+              </h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="https://raw.githubusercontent.com/..."
+                  className="flex-1 bg-[#252526] border border-gray-700 text-gray-300 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-blue-500/50"
+                  onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()}
+                />
+                <button
+                  onClick={handleUrlSubmit}
+                  disabled={isLoading}
+                  className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded disabled:opacity-50"
+                >
+                  Load
+                </button>
+              </div>
+              {error && (
+                <div className="mt-2 text-xs text-red-400 bg-red-500/10 p-2 rounded border border-red-500/20">
+                  <span className="font-semibold">Error:</span> {error}
+                </div>
+              )}
+            </div>
             <h3 className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">
                   Select Repository
             </h3>
