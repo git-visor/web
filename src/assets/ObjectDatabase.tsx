@@ -25,8 +25,8 @@ export interface CommitObject extends GitObject {
   parent?: string[]
   author: string
   message: string
-  timestamp: string
-  diff?: { status: string; path: string; hash: string }[]
+  timestamp?: string
+  diff?: { status: string; path: string; hash: string; content: string }[]
 }
 
 export interface TreeObject extends GitObject {
@@ -248,7 +248,7 @@ export function ObjectDatabase(): JSX.Element {
               >
                 {availableDatasets.map((data, index) => (
                   <option key={index} value={index}>
-                    {data.name || (data as RepositoryData).repositoryName}
+                    {data.repositoryName || (data as RepositoryData).repositoryName}
                   </option>
                 ))}
               </select>
