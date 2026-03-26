@@ -42,6 +42,7 @@ export function ObjectGraph({
   const NODE_TO_LABELS_GAP = 30 // Vertical gap between node and its label
   const COL_LABEL_SCALE = 0.7 // Scale for column header font size relative to node radius
   const LINE_WIDTH = 1.5 // Base line width for connections
+  const LUCIDE_ICON_SIZE = 24 // Base size for Lucide icons (they are designed for 24x24)
   const ICON_SCALE = 0.7 // Scale for Lucide icons (1 = 24px, adjust if you want smaller/larger icons)
   const NODE_LABEL_SCALE = 0.6 // Scale for node labels relative to node radius
   const NODE_LABEL_VERTICAL_GAP = 14 // Vertical gap between node and label for non-commit nodes
@@ -544,9 +545,9 @@ export function ObjectGraph({
       // Reference size for Lucide icons is 24x24.
       // We want to center it, so we shift back by 12.
       // We can also scale it down slightly if needed (e.g. 0.8x for 19px icon)
-      const scale = ICON_SCALE * (NODE_RADIUS * 2) / 24 // Scale to fit node size
+      const scale = ICON_SCALE * (NODE_RADIUS * 2) / LUCIDE_ICON_SIZE // Scale to fit node size
       ctx.scale(scale, scale)
-      ctx.translate(-12, -12) 
+      ctx.translate(-LUCIDE_ICON_SIZE / 2, -LUCIDE_ICON_SIZE / 2) // Center the icon
 
       ctx.lineWidth = 2
       // Icon color (light/white for contrast)
