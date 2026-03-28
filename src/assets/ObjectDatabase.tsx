@@ -106,8 +106,12 @@ export function ObjectDatabase(): JSX.Element {
     return objects.filter((o) => included.has(o.hash))
   }, [objects, branches, selectedBranch])
 
-  const filteredObjects = useMemo(() => {
-    return branchScopedObjects.filter((obj) => visibleTypes.includes(obj.type))
+  const visibilityMap = useMemo(() => {
+    const map: Map<string, boolean> = new Map()
+    for (const obj of branchScopedObjects) {
+      map.set(obj.hash, visibleTypes.includes(obj.type))
+    }
+    return map
   }, [branchScopedObjects, visibleTypes])
 
   // Handle loading and error states
@@ -133,12 +137,13 @@ export function ObjectDatabase(): JSX.Element {
             className={`absolute inset-0 overflow-hidden p-0`}
           >
             <ObjectGraph 
-              objects={filteredObjects} 
+              objects={branchScopedObjects} 
               selectedHash={selectedObject?.hash}
               onSelectObject={(hash) => {
                 const obj = objects.find((o) => o.hash === hash)
                 if (obj) dispatch(setSelectedObject(obj))
               }}
+              visibilityMap={visibilityMap}
             />
           </div>
         </div>
