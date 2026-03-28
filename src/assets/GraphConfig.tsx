@@ -1,4 +1,4 @@
-import { useCallback, useEffect, type JSX } from 'react'
+import { useCallback, useEffect, useRef, type JSX } from 'react'
 import { Check } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setUrlInput, setCurrentMockIndex, setVisibleTypes, setIsLoading, setError, setSelectedObject, setCustomData, setCurrentBranch, setBranches } from '../store/slices/graph';
@@ -37,80 +37,69 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
   const availableDatasets = useAppSelector((state) => state.graph.availableDatasets);
   const currentBranch = useAppSelector((state) => state.graph.currentBranch);
   const branches = useAppSelector((state) => state.graph.branches);
+  const isFirstLoad = useRef(true);
   
   const handleBranchChange = (branchName: string) => {
     dispatch(setCurrentBranch(branchName));
   };
-  // Extract fetch logic to reusable function
-  const loadFromUrl = useCallback(async (url: string) => {
-    if (!url) return
+  const loadFromUrl = useCallback(
+    async (url: string) => {
+      if (!url) return;
 
-    dispatch(setIsLoading(true));
-    dispatch(setError(null));
+      dispatch(setIsLoading(true));
+      dispatch(setError(null));
 
-    try {
-      const rawUrl = getRawGithubUrl(url)
-      const res = await fetch(rawUrl)
-      if (!res.ok) throw new Error(`Failed to load: ${res.statusText}`)
-      
-      const data = await res.json()
-      // Basic validation
-      if (!data.objects || !Array.isArray(data.objects)) {
-        throw new Error('Invalid JSON format: missing "objects" array')
+      try {
+        const rawUrl = getRawGithubUrl(url);
+        const res = await fetch(rawUrl);
+        if (!res.ok) throw new Error(`Failed to load: ${res.statusText}`);
+
+        const data = await res.json();
+        if (!data.objects || !Array.isArray(data.objects)) {
+          throw new Error('Invalid JSON format: missing "objects" array');
+        }
+        dispatch(
+          setCustomData({
+            ...data,
+            name: data.repositoryName || 'External Repository',
+          })
+        );
+        dispatch(setCurrentMockIndex(availableDatasets.length - 1));
+      } catch (err: Error | unknown) {
+        dispatch(setError(err instanceof Error ? err.message : 'An unknown error occurred'));
+        console.error('Error fetching git objects:', err);
+      } finally {
+        dispatch(setIsLoading(false));
       }
-      
-      dispatch(setCustomData({
-        ...data,
-        name: data.repositoryName || 'External Repository'
-      }))
-      // Automatically select the new custom dataset (last index after mocked data)
-      dispatch(setCurrentMockIndex(availableDatasets.length - 1))
-    } catch (err: Error | unknown) {
-      dispatch(setError(err instanceof Error ? err.message : 'An unknown error occurred'))
-      console.error('Error fetching git objects:', err)
-    } finally {
-      dispatch(setIsLoading(false))
-    }
-  }, []);
+    },
+    [dispatch, availableDatasets.length]
+  );
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const url = params.get('url');
-    if (url) {
-      dispatch(setUrlInput(url));
-      loadFromUrl(url);
-    }
-
-    if (availableDatasets.length > 0) {
-      const defaultRepo = availableDatasets[0]; // Assuming the first dataset is the default
-      if (defaultRepo.branches) {
-        dispatch(setBranches(defaultRepo.branches));
-        const defaultBranch =
-          defaultRepo.branches.find((branch) => branch.current)?.name ||
-          defaultRepo.branches[0]?.name ||
-          '';
-        dispatch(setCurrentBranch(defaultBranch));
+  const handleUrlSubmit = useCallback(
+    (inputUrl: string) => {
+      const trimmedUrl = inputUrl.trim();
+      if (!trimmedUrl) {
+        dispatch(setError('Please provide a URL to load data from'));
+        return;
       }
-    }
-  }, [dispatch, loadFromUrl, availableDatasets]);
+      dispatch(setUrlInput(trimmedUrl));
+      try {
+        const params = new URLSearchParams(window.location.search);
+        params.set('url', trimmedUrl);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.pushState(null, '', newUrl);
+      } catch {
+        // If URL manipulation fails (e.g., non-browser env), ignore
+      }
+      loadFromUrl(trimmedUrl);
+    },
+    [dispatch, loadFromUrl]
+  );
 
-  const handleUrlSubmit = () => {
-    if (!urlInput.trim()) return;
-
-    dispatch(setIsLoading(true));
-    dispatch(setError(null));
-
-    // Simulate loading logic
-    setTimeout(() => {
-      dispatch(setIsLoading(false));
-      dispatch(setUrlInput(urlInput));
-    }, 1000);
-  };
 
   const handleDatasetChange = (index: number) => {
     dispatch(setCurrentMockIndex(index));
-    setSelectedObject(null); // Clear selection when changing dataset
-    // Set branches to the selected repo's branches
+    dispatch(setSelectedObject(null));
     const selectedRepo = availableDatasets[index];
     if (selectedRepo.branches) {
       dispatch(setBranches(selectedRepo.branches));
@@ -150,6 +139,35 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
     }
   }
   
+  // handle initialisation
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get('url');
+
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      if (url && url !== urlInput) {
+        dispatch(setUrlInput(url));
+        loadFromUrl(url);
+      }
+    }
+  }, [dispatch, loadFromUrl, urlInput]);
+
+  // handle change in currentMockIndex
+  useEffect(() => {
+    dispatch(setSelectedObject(null));
+    if (availableDatasets.length === 0) return;
+    const selectedRepo = availableDatasets[currentMockIndex];
+    if (selectedRepo.branches) {
+      dispatch(setBranches(selectedRepo.branches));
+      const currentBranch = selectedRepo.branches.find(branch => branch.current)?.name || selectedRepo.branches[0]?.name || '';
+      dispatch(setCurrentBranch(currentBranch));
+    } else {
+      dispatch(setBranches([]));
+      dispatch(setCurrentBranch(''));
+    }
+  }, [currentMockIndex, availableDatasets, dispatch]);
+
   return (
     <div className="p-4 border-b border-gray-700 flex-shrink-0 max-h-[50vh] overflow-y-auto">  
       <div className="mb-4">
@@ -157,23 +175,31 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
           title="Load External JSON"
           urlInput={urlInput}
           onUrlChange={(url) => dispatch(setUrlInput(url))}
-          onSubmit={handleUrlSubmit}
+          onSubmit={
+            () => handleUrlSubmit(urlInput)
+          }
           isLoading={isLoading}
           error={error}
         />
-        <RepositorySelection
-          title="Select Repository"
-          availableDatasets={availableDatasets}
-          currentIndex={currentMockIndex}
-          onSelectDataset={handleDatasetChange}
-          customData={customData}
-        />
-        <BranchSelection
-          title="Select Branch"
-          branches={branches}
-          currentBranch={currentBranch}
-          onSelectBranch={handleBranchChange}
-        />
+      </div>
+      <div className="flex-1 flex gap-x-6">
+        <div className="flex-1">
+          <RepositorySelection
+            title="Select Repository"
+            availableDatasets={availableDatasets}
+            currentIndex={currentMockIndex}
+            onSelectDataset={handleDatasetChange}
+            customData={customData}
+          />
+        </div>
+        <div className="flex-1">
+          <BranchSelection
+            title="Select Branch"
+            branches={branches}
+            currentBranch={currentBranch}
+            onSelectBranch={handleBranchChange}
+          />
+        </div>
       </div>
 
       <div className="mb-2">

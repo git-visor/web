@@ -29,7 +29,7 @@ export function ObjectDatabase(): JSX.Element {
     dispatch(setAvailableDatasets(combinedDatasets))
   }, [customData, dispatch])
 
-    // Use availableDatasets instead of mockDataList directly
+  // Use availableDatasets instead of mockDataList directly
   const objects = useMemo(() => {
     // Safety check in case index is out of bounds
     if (!availableDatasets || availableDatasets.length === 0) return []
@@ -47,9 +47,9 @@ export function ObjectDatabase(): JSX.Element {
   
   const branches = useAppSelector((state) => state.graph.branches)
   const selectedBranch = useAppSelector((state) => state.graph.currentBranch)
-  console.log(selectedBranch, branches)
 
   const branchScopedObjects = useMemo(() => {
+    console.log(objects);
     if (!selectedBranch) return objects
 
     const selected = branches.find((b) => b.name === selectedBranch)
@@ -108,6 +108,7 @@ export function ObjectDatabase(): JSX.Element {
   }, [objects, branches, selectedBranch])
 
   const filteredObjects = useMemo(() => {
+    console.log(branchScopedObjects)
     return branchScopedObjects.filter((obj) => visibleTypes.includes(obj.type))
   }, [branchScopedObjects, visibleTypes])
 

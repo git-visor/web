@@ -9,7 +9,7 @@ interface GraphState {
   isLoading: boolean;
   error: string | null;
   selectedObject: GitObject | null;
-  customData?: RepositoryData | null;
+  customData: RepositoryData | null;
   availableDatasets: RepositoryData[];
   branches: BranchInfo[];
   currentBranch: string;
