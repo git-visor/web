@@ -1,8 +1,15 @@
 {
   "repositoryName": "File Editing Example",
   "repositoryPath": "D:\\Education\\CS3281\\File Editing Example",
-  "exportDate": "2026-03-15T15:01:21.284Z",
+  "exportDate": "2026-03-26T06:08:17.711Z",
   "totalObjects": 8,
+  "branches": [
+    {
+      "name": "main",
+      "commitHash": "26cf8a2c87dec6688715a0d93c12bb47c9cc4f86",
+      "current": true
+    }
+  ],
   "objects": [
     {
       "hash": "26cf8a2c87dec6688715a0d93c12bb47c9cc4f86",
@@ -18,8 +25,8 @@
       ],
       "timestamp": 1773373394000,
       "tree": "c1328674bf3ffab6eb0091347f3c010f1aba8a95",
-      "author": "random_guy <random_email@gmail.com>",
-      "committer": "random_guy <random_email@gmail.com>",
+      "author": "thegrimbee <gabriel.mario.antaputra@gmail.com>",
+      "committer": "thegrimbee <gabriel.mario.antaputra@gmail.com>",
       "message": "edit file",
       "diff": [
         {
@@ -108,8 +115,8 @@
       "parent": [],
       "timestamp": 1773373381000,
       "tree": "4917d768f3f09a100af8f24dd1f0c5fdfc0e294a",
-      "author": "random_guy <random_email@gmail.com>",
-      "committer": "random_guy <random_email@gmail.com>",
+      "author": "thegrimbee <gabriel.mario.antaputra@gmail.com>",
+      "committer": "thegrimbee <gabriel.mario.antaputra@gmail.com>",
       "message": "initial commit",
       "diff": [
         {

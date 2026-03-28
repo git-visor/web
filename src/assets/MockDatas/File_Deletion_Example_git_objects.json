@@ -1,8 +1,15 @@
 {
   "repositoryName": "File Deletion Example",
   "repositoryPath": "D:\\Education\\CS3281\\File Deletion Example",
-  "exportDate": "2026-03-15T15:01:05.134Z",
+  "exportDate": "2026-03-26T06:00:37.501Z",
   "totalObjects": 6,
+  "branches": [
+    {
+      "name": "main",
+      "commitHash": "730c2d4c2b054424cb8485c9b222bbdec21d49c8",
+      "current": true
+    }
+  ],
   "objects": [
     {
       "hash": "0b10434f644aafa4894795ce0b68ee3bc4d1e349",
@@ -44,8 +51,8 @@
       "parent": [],
       "timestamp": 1773372103000,
       "tree": "fecd8d29fa77c7e42582650ea6cb3c476027dce0",
-      "author": "random_guy <random_email@gmail.com>",
-      "committer": "random_guy <random_email@gmail.com>",
+      "author": "thegrimbee <gabriel.mario.antaputra@gmail.com>",
+      "committer": "thegrimbee <gabriel.mario.antaputra@gmail.com>",
       "message": "initial commit",
       "diff": [
         {
@@ -76,8 +83,8 @@
       ],
       "timestamp": 1773373241000,
       "tree": "cc1e5ffbfea919dcff06b0fa36e4cf7c622a4150",
-      "author": "random_guy <random_email@gmail.com>",
-      "committer": "random_guy <random_email@gmail.com>",
+      "author": "thegrimbee <gabriel.mario.antaputra@gmail.com>",
+      "committer": "thegrimbee <gabriel.mario.antaputra@gmail.com>",
       "message": "delete file",
       "diff": [
         {
