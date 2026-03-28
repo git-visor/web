@@ -7,7 +7,7 @@ import { ObjectGraph } from './ObjectGraph'
 import { useMemo, useEffect } from 'react'
 import type { JSX } from 'react'
 import { mockDataList } from './MockData'
-import type { GitObject } from './ObjectTypes'
+import type { GitObject, TagObject, TreeObject, CommitObject } from './ObjectTypes'
 import { GraphConfig } from './GraphConfig'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
@@ -45,10 +45,71 @@ export function ObjectDatabase(): JSX.Element {
     {} as Record<string, number>
   )
   
-  // derived filtered list
+  const branches = useAppSelector((state) => state.graph.branches)
+  const selectedBranch = useAppSelector((state) => state.graph.currentBranch)
+  console.log(selectedBranch, branches)
+
+  const branchScopedObjects = useMemo(() => {
+    if (!selectedBranch) return objects
+
+    const selected = branches.find((b) => b.name === selectedBranch)
+    if (!selected) return objects
+
+    const objectMap = new Map(objects.map((o) => [o.hash, o]))
+    const included = new Set<string>()
+
+    const includeTree = (rootTreeHash: string): void => {
+      const queue: string[] = [rootTreeHash]
+      let i = 0
+      while (i < queue.length) {
+        const hash = queue[i++]
+        if (!hash || included.has(hash)) continue
+        included.add(hash)
+
+        const obj = objectMap.get(hash)
+        if (obj?.type === 'tree') {
+          const tree = obj as TreeObject
+          for (const entry of tree.entries) {
+            queue.push(entry.hash)
+          }
+        }
+      }
+    }
+
+    // Walk commit ancestry from selected branch tip
+    const stack: string[] = [selected.commitHash]
+    while (stack.length > 0) {
+      const hash = stack.pop()
+      if (!hash || included.has(hash)) continue
+
+      const obj = objectMap.get(hash)
+      if (!obj || obj.type !== 'commit') continue
+
+      const commit = obj as CommitObject
+      included.add(commit.hash)
+
+      if (commit.tree) includeTree(commit.tree)
+      for (const parentHash of commit.parent ?? []) {
+        stack.push(parentHash)
+      }
+    }
+
+    // Keep tags that point to included objects
+    for (const obj of objects) {
+      if (obj.type === 'tag') {
+        const tagObj = obj as TagObject
+        if (included.has(tagObj.objectHash)) {
+          included.add(tagObj.hash)
+        }
+      }
+    }
+
+    return objects.filter((o) => included.has(o.hash))
+  }, [objects, branches, selectedBranch])
+
   const filteredObjects = useMemo(() => {
-    return objects.filter((obj) => visibleTypes.includes(obj.type))
-  }, [objects, visibleTypes])
+    return branchScopedObjects.filter((obj) => visibleTypes.includes(obj.type))
+  }, [branchScopedObjects, visibleTypes])
 
   // Handle loading and error states
   if (isLoading) {

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, type JSX } from 'react'
 import { Check } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setUrlInput, setCurrentMockIndex, setVisibleTypes, setIsLoading, setError, setSelectedObject, setCustomData } from '../store/slices/graph';
+import { setUrlInput, setCurrentMockIndex, setVisibleTypes, setIsLoading, setError, setSelectedObject, setCustomData, setCurrentBranch, setBranches } from '../store/slices/graph';
 import { CustomUrlInput } from './GraphConfigs/CustomUrlInput';
 import { RepositorySelection } from './GraphConfigs/RepositorySelection';
+import { BranchSelection } from './GraphConfigs/BranchSelection';
 
 function getRawGithubUrl(url: string): string {
   try {
@@ -34,8 +35,12 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
   const customData = useAppSelector((state) => state.graph.customData);
   const error = useAppSelector((state) => state.graph.error);
   const availableDatasets = useAppSelector((state) => state.graph.availableDatasets);
+  const currentBranch = useAppSelector((state) => state.graph.currentBranch);
+  const branches = useAppSelector((state) => state.graph.branches);
   
-
+  const handleBranchChange = (branchName: string) => {
+    dispatch(setCurrentBranch(branchName));
+  };
   // Extract fetch logic to reusable function
   const loadFromUrl = useCallback(async (url: string) => {
     if (!url) return
@@ -61,21 +66,33 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
       // Automatically select the new custom dataset (last index after mocked data)
       dispatch(setCurrentMockIndex(availableDatasets.length - 1))
     } catch (err: Error | unknown) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred')
+      dispatch(setError(err instanceof Error ? err.message : 'An unknown error occurred'))
       console.error('Error fetching git objects:', err)
     } finally {
-      setIsLoading(false)
+      dispatch(setIsLoading(false))
     }
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const url = params.get('url')
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get('url');
     if (url) {
-      setUrlInput(url)
-      loadFromUrl(url)
+      dispatch(setUrlInput(url));
+      loadFromUrl(url);
     }
-  }, [loadFromUrl])
+
+    if (availableDatasets.length > 0) {
+      const defaultRepo = availableDatasets[0]; // Assuming the first dataset is the default
+      if (defaultRepo.branches) {
+        dispatch(setBranches(defaultRepo.branches));
+        const defaultBranch =
+          defaultRepo.branches.find((branch) => branch.current)?.name ||
+          defaultRepo.branches[0]?.name ||
+          '';
+        dispatch(setCurrentBranch(defaultBranch));
+      }
+    }
+  }, [dispatch, loadFromUrl, availableDatasets]);
 
   const handleUrlSubmit = () => {
     if (!urlInput.trim()) return;
@@ -93,6 +110,17 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
   const handleDatasetChange = (index: number) => {
     dispatch(setCurrentMockIndex(index));
     setSelectedObject(null); // Clear selection when changing dataset
+    // Set branches to the selected repo's branches
+    const selectedRepo = availableDatasets[index];
+    if (selectedRepo.branches) {
+      dispatch(setBranches(selectedRepo.branches));
+      // Set current branch to the one marked as current in the data, or default to first branch
+      const currentBranch = selectedRepo.branches.find(branch => branch.current)?.name || selectedRepo.branches[0]?.name || '';
+      dispatch(setCurrentBranch(currentBranch));
+    } else {
+      dispatch(setBranches([]));
+      dispatch(setCurrentBranch(''));
+    }
   };
 
   const toggleVisibleType = (type: string) => {
@@ -139,6 +167,12 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
           currentIndex={currentMockIndex}
           onSelectDataset={handleDatasetChange}
           customData={customData}
+        />
+        <BranchSelection
+          title="Select Branch"
+          branches={branches}
+          currentBranch={currentBranch}
+          onSelectBranch={handleBranchChange}
         />
       </div>
 

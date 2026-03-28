@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { GitObject, RepositoryData } from '../../assets/ObjectTypes';
+import type { BranchInfo, GitObject, RepositoryData } from '../../assets/ObjectTypes';
 
 interface GraphState {
   urlInput: string;
@@ -11,6 +11,8 @@ interface GraphState {
   selectedObject: GitObject | null;
   customData?: RepositoryData | null;
   availableDatasets: RepositoryData[];
+  branches: BranchInfo[];
+  currentBranch: string;
 }
 
 const initialState: GraphState = {
@@ -22,6 +24,8 @@ const initialState: GraphState = {
   selectedObject: null,
   customData: null,
   availableDatasets: [],
+  branches: [],
+  currentBranch: '',
 };
 
 const graphSlice = createSlice({
@@ -51,7 +55,13 @@ const graphSlice = createSlice({
     },
     setAvailableDatasets(state, action: PayloadAction<RepositoryData[]>) {
       state.availableDatasets = action.payload;
-    }
+    },
+    setBranches(state, action: PayloadAction<BranchInfo[]>) {
+      state.branches = action.payload;
+    },
+    setCurrentBranch(state, action: PayloadAction<string>) {
+      state.currentBranch = action.payload;
+    },
   },
 });
 
@@ -63,7 +73,9 @@ export const {
   setError,
   setSelectedObject,
   setCustomData,
-  setAvailableDatasets
+  setAvailableDatasets,
+  setBranches,
+  setCurrentBranch,
 } = graphSlice.actions;
 
 export default graphSlice.reducer;
