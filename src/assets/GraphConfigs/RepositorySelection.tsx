@@ -29,8 +29,8 @@ export function RepositorySelection({
           className="w-full bg-[#252526] border border-gray-700 text-gray-300 text-xs rounded px-2 py-1.5 appearance-none focus:outline-none focus:border-blue-500/50 pr-8"
         >
           {availableDatasets.map((data, index) => (
-            <option key={index} value={index}>
-              {data.repositoryName || (data as RepositoryData).repositoryName}
+            <option key={data.repositoryName} value={index}>
+              {data.repositoryName}
             </option>
           ))}
         </select>

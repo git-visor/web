@@ -19,7 +19,7 @@ export interface CommitObject extends GitObject {
   parent?: string[]
   author: string
   message: string
-  timestamp?: string
+  timestamp?: number
   diff?: { status: string; path: string; hash: string; content: string }[]
 }
 

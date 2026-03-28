@@ -41,6 +41,7 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
   
   const handleBranchChange = (branchName: string) => {
     dispatch(setCurrentBranch(branchName));
+    dispatch(setSelectedObject(null));
   };
   const loadFromUrl = useCallback(
     async (url: string) => {
@@ -157,10 +158,17 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
   useEffect(() => {
     dispatch(setSelectedObject(null));
     if (availableDatasets.length === 0) return;
-    const selectedRepo = availableDatasets[currentMockIndex];
-    if (selectedRepo.branches) {
+    const safeIndex =
+      currentMockIndex >= 0 && currentMockIndex < availableDatasets.length
+        ? currentMockIndex
+        : 0;
+    const selectedRepo = availableDatasets[safeIndex];
+    if (selectedRepo && selectedRepo.branches) {
       dispatch(setBranches(selectedRepo.branches));
-      const currentBranch = selectedRepo.branches.find(branch => branch.current)?.name || selectedRepo.branches[0]?.name || '';
+      const currentBranch =
+        selectedRepo.branches.find(branch => branch.current)?.name ||
+        selectedRepo.branches[0]?.name ||
+        '';
       dispatch(setCurrentBranch(currentBranch));
     } else {
       dispatch(setBranches([]));
