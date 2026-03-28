@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 
-export function GraphLegend(): JSX.Element {
+export function Legend(): JSX.Element {
   return (
     <div className="absolute bottom-4 left-4 bg-[#252526] border border-gray-700 rounded p-3 text-xs text-gray-400 shadow-xl pointer-events-none opacity-80">
       <p className="mb-2 font-semibold">Git Objects:</p>

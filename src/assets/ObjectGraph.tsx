@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo} from 'react'
 import type { JSX } from 'react'
 import type { GitObject, CommitObject, BlobObject, TreeObject, TagObject } from './ObjectTypes'
-import { GraphLegend } from './GraphLegend'
+import { Legend } from './GraphComponents/Legend'
 
 interface ObjectGraphProps {
   objects: Array<GitObject | CommitObject | BlobObject | TreeObject | TagObject>
@@ -691,7 +691,7 @@ export function ObjectGraph({
         className="w-full h-full block"
         style={{ cursor: draggedNodeHash ? 'grabbing' : isPanning ? 'move' : 'default' }}
       />
-      <GraphLegend/>
+      <Legend/>
     </div>
   )
 }
