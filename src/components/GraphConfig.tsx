@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, type JSX } from 'react'
-import { Check } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setUrlInput, setCurrentMockIndex, setVisibleTypes, setIsLoading, setError, setSelectedObject, setCustomData, setCurrentBranch, setBranches } from '../store/slices/graph';
 import { CustomUrlInput } from './GraphConfigs/CustomUrlInput';
 import { RepositorySelection } from './GraphConfigs/RepositorySelection';
 import { BranchSelection } from './GraphConfigs/BranchSelection';
+import { FilterObjects } from './GraphConfigs/FilterObjects';
+import { ReportBug } from './ReportBug';
 
 function getRawGithubUrl(url: string): string {
   try {
@@ -177,7 +178,7 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
   }, [currentMockIndex, availableDatasets, dispatch]);
 
   return (
-    <div className="p-4 border-b border-gray-700 flex-shrink-0 max-h-[50vh] overflow-y-auto">  
+    <div className="p-4 border-b border-gray-700 flex-shrink-0 max-h-[50vh] overflow-y-auto relative">  
       <div className="mb-4">
         <CustomUrlInput
           title="Load External JSON"
@@ -209,36 +210,17 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
           />
         </div>
       </div>
-
-      <div className="mb-2">
-        <h3 className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">
-          Filter Objects
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {['commit', 'tree', 'blob', 'tag'].map((type) => (
-            <button
-              key={type}
-              onClick={() => {
-                toggleVisibleType(type);
-              }}
-              className={`flex items-center gap-1.5 px-2 py-1 text-xs rounded border transition-all ${
-                isTypeVisible(type)
-                  ? getTypeColor(type)
-                  : 'bg-[#252526] border-gray-700 text-gray-500 hover:border-gray-600 opacity-60'
-              }`}
-            >
-              {isTypeVisible(type) ? (
-                <Check className="w-3 h-3" />
-              ) : (
-                <div className="w-3 h-3" />
-              )}
-              <span className="capitalize">{type}s</span>
-              <span className="opacity-50 ml-1 text-[10px] bg-black/20 px-1 rounded-full">
-                {objectCounts[type] || 0}
-              </span>
-            </button>
-          ))}
-        </div>
+      <div className="flex-1 flex">
+        <FilterObjects
+          title="Filter Object Types"
+          objectCounts={objectCounts}
+          isTypeVisible={isTypeVisible}
+          toggleVisibleType={toggleVisibleType}
+          getTypeColor={getTypeColor}
+        />
+      </div>
+      <div className="absolute bottom-6 right-6">
+        <ReportBug />
       </div>
     </div>
   )

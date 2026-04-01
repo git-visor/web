@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { BranchInfo, GitObject, RepositoryData } from '../../assets/ObjectTypes';
+import type { BranchInfo, GitObject, RepositoryData } from '../../components/ObjectTypes';
 
 interface GraphState {
   urlInput: string;
