@@ -1,4 +1,4 @@
-import { ObjectDatabase } from './assets/ObjectDatabase'
+import { ObjectDatabase } from './components/ObjectDatabase'
 import { Provider } from 'react-redux'
 import { store } from './store/index'
 // src/App.tsx
