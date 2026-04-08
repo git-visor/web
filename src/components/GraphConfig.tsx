@@ -66,7 +66,6 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
             name: data.repositoryName || 'External Repository',
           })
         );
-        dispatch(setCurrentMockIndex(availableDatasets.length - 1));
       } catch (err: Error | unknown) {
         dispatch(setError(err instanceof Error ? err.message : 'An unknown error occurred'));
         console.error('Error fetching git objects:', err);
@@ -74,7 +73,7 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
         dispatch(setIsLoading(false));
       }
     },
-    [dispatch, availableDatasets.length]
+    [dispatch]
   );
 
   const handleUrlSubmit = useCallback(
@@ -141,6 +140,12 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
     }
   }
   
+  useEffect(() => {
+    if (!customData) return;
+    if (availableDatasets.length === 0) return;
+    dispatch(setCurrentMockIndex(availableDatasets.length - 1));
+  }, [customData, availableDatasets.length, dispatch]);
+
   // handle initialisation
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
