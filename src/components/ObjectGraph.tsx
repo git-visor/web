@@ -40,9 +40,9 @@ export function ObjectGraph({
   const NODE_RADIUS = 20
   const ROW_HEIGHT = 70 // Fixed height per node -> ensures spacing
   const COL_WIDTH_TAG = 50 // New column for tags
-  const COL_WIDTH_COMMIT = 150 // Shifted right to make room for tags
+  const COL_WIDTH_COMMIT = 170 // Shifted right to make room for tags
   const COL_START_OBJECTS = 300 // Shifted right
-  const DEPTH_INDENT = 120 // How far right each subfolder moves
+  const DEPTH_INDENT = 140 // How far right each subfolder moves
   const NODE_TO_LABELS_GAP = 30 // Vertical gap between node and its label
   const COL_LABEL_SCALE = 0.7 // Scale for column header font size relative to node radius
   const LINE_WIDTH = 1.5 // Base line width for connections
@@ -638,7 +638,7 @@ export function ObjectGraph({
     ctx.fillText('TAGS', COL_WIDTH_TAG, -20)
     ctx.fillText('COMMITS', COL_WIDTH_COMMIT, -20)
     ctx.fillText('ROOT TREES', COL_START_OBJECTS, -20)
-    ctx.fillText('SUB TREES / FILES', COL_START_OBJECTS + DEPTH_INDENT * 1.5, -20)
+    ctx.fillText('SUB TREES / FILES', COL_START_OBJECTS + DEPTH_INDENT * 1.1, -20)
 
     ctx.restore()
   }, [objects, selectedHash, panOffset, nodePositions, containerSize, relatedHashes, ICON_PATHS, visibilityMap])
