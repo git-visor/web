@@ -120,43 +120,43 @@ export function ObjectGraph({
     const treeReachableCache = new Map<string, Set<string>>()
     const getReachableFromTree = (rootTreeHash: string): Set<string> => {
       if (treeReachableCache.has(rootTreeHash)) {
-        return treeReachableCache.get(rootTreeHash)!;
+        return treeReachableCache.get(rootTreeHash)!
       }
 
-      const seen = new Set<string>();
-      const queue: string[] = [rootTreeHash];
-      let i = 0;
+      const seen = new Set<string>()
+      const queue: string[] = [rootTreeHash]
+      let i = 0
 
       while (i < queue.length) {
-        const current = queue[i++];
-        if (!current || seen.has(current)) continue;
-        seen.add(current);
+        const current = queue[i++]
+        if (!current || seen.has(current)) continue
+        seen.add(current)
 
-        const obj = objectMap.get(current);
+        const obj = objectMap.get(current)
         if (obj?.type === 'tree') {
-          const tree = obj as TreeObject;
+          const tree = obj as TreeObject
           for (const entry of tree.entries) {
-            const childHash = entry.hash;
-            const childObj = objectMap.get(childHash);
+            const childHash = entry.hash
+            const childObj = objectMap.get(childHash)
             if (childObj?.type === 'tree') {
-              const childCached = treeReachableCache.get(childHash);
+              const childCached = treeReachableCache.get(childHash)
               if (childCached) {
                 for (const h of childCached) {
                   if (!seen.has(h)) {
-                    seen.add(h);
+                    seen.add(h)
                   }
                 }
-                continue;
+                continue
               }
             }
-            queue.push(childHash);
+            queue.push(childHash)
           }
         }
       }
 
       // Store the computed set in the cache
-      treeReachableCache.set(rootTreeHash, seen);
-      return seen;
+      treeReachableCache.set(rootTreeHash, seen)
+      return seen
     }
 
     const reachableByCommit = new Map<string, Set<string>>()
@@ -200,11 +200,11 @@ export function ObjectGraph({
     }
 
     const findNextFree = (depth: number, row: number): number => {
-    const m = getDepthMap(depth)
-    const next = m.get(row)
-    if (next === undefined) return row
-    const root = findNextFree(depth, next)
-    if (root !== next) m.set(row, root)
+      const m = getDepthMap(depth)
+      const next = m.get(row)
+      if (next === undefined) return row
+      const root = findNextFree(depth, next)
+      if (root !== next) m.set(row, root)
       return root
     }
 
