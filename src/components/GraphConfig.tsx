@@ -39,7 +39,7 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
   const currentBranch = useAppSelector((state) => state.graph.currentBranch);
   const branches = useAppSelector((state) => state.graph.branches);
   const isFirstLoad = useRef(true);
-  const lastAutoSelectedCustomData = useRef<unknown>(null);
+  const lastAutoSelectedCustomData = useRef<typeof customData>(null);
   
   const handleBranchChange = (branchName: string) => {
     dispatch(setCurrentBranch(branchName));
