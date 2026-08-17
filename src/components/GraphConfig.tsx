@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, type JSX } from 'react'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setUrlInput, setCurrentMockIndex, setVisibleTypes, setIsLoading, setError, setSelectedObject, setCustomData, setCurrentBranch, setBranches } from '../store/slices/graph';
+import { setUrlInput, setCurrentMockIndex, setVisibleTypes, setIsLoading, setError, setSelectedObject, setCustomData, setCurrentBranch, setBranches, setIsEmbed } from '../store/slices/graph';
 import { CustomUrlInput } from './GraphConfigs/CustomUrlInput';
 import { RepositorySelection } from './GraphConfigs/RepositorySelection';
 import { BranchSelection } from './GraphConfigs/BranchSelection';
@@ -154,17 +154,19 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
 
   // handle initialisation
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const url = params.get('url');
+    const params = new URLSearchParams(window.location.search)
+    const url = params.get('url')
+    const embed = params.get('embed') === '1'
+    dispatch(setIsEmbed(embed))
 
     if (isFirstLoad.current) {
-      isFirstLoad.current = false;
+      isFirstLoad.current = false
       if (url && url !== urlInput) {
-        dispatch(setUrlInput(url));
-        loadFromUrl(url);
+        dispatch(setUrlInput(url))
+        loadFromUrl(url)
       }
     }
-  }, [dispatch, loadFromUrl, urlInput]);
+  }, [dispatch, loadFromUrl, urlInput])
 
   // handle change in currentMockIndex
   useEffect(() => {

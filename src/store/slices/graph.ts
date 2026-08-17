@@ -13,6 +13,7 @@ interface GraphState {
   availableDatasets: RepositoryData[];
   branches: BranchInfo[];
   currentBranch: string;
+  isEmbed: boolean;
 }
 
 const initialState: GraphState = {
@@ -26,6 +27,7 @@ const initialState: GraphState = {
   availableDatasets: [],
   branches: [],
   currentBranch: '',
+  isEmbed: false,
 };
 
 const graphSlice = createSlice({
@@ -62,6 +64,9 @@ const graphSlice = createSlice({
     setCurrentBranch(state, action: PayloadAction<string>) {
       state.currentBranch = action.payload;
     },
+    setIsEmbed(state, action: PayloadAction<boolean>) {
+      state.isEmbed = action.payload
+    }
   },
 });
 
@@ -76,6 +81,7 @@ export const {
   setAvailableDatasets,
   setBranches,
   setCurrentBranch,
+  setIsEmbed
 } = graphSlice.actions;
 
 export default graphSlice.reducer;
