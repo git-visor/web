@@ -2,12 +2,14 @@ import { useEffect, useRef, useState, useMemo} from 'react'
 import type { JSX } from 'react'
 import type { GitObject, CommitObject, BlobObject, TreeObject, TagObject } from './ObjectTypes'
 import { Legend } from './GraphComponents/Legend'
+import { ExternalLink } from 'lucide-react'
 
 interface ObjectGraphProps {
   objects: Array<GitObject | CommitObject | BlobObject | TreeObject | TagObject>
   selectedHash?: string
   onSelectObject: (hash: string) => void
   visibilityMap: Map<string, boolean>
+  openLinkUrl?: string  // NEW
 }
 
 
@@ -24,7 +26,8 @@ export function ObjectGraph({
   objects,
   selectedHash,
   onSelectObject,
-  visibilityMap
+  visibilityMap,
+  openLinkUrl
 }: ObjectGraphProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [panOffset, setPanOffset] = useState({ x: 50, y: 50 }) // Start with some padding
@@ -752,7 +755,21 @@ export function ObjectGraph({
         className="w-full h-full block"
         style={{ cursor: draggedNodeHash ? 'grabbing' : isPanning ? 'move' : 'default' }}
       />
-      <Legend/>
+      {openLinkUrl && (
+        <a
+          href={openLinkUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open in GitVisor"
+          className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full
+                    bg-gray-800/90 border border-gray-600 text-xs text-gray-200
+                    hover:text-white hover:bg-gray-700/90 hover:border-gray-500 transition-colors"
+        >
+          <ExternalLink className="w-3.5 h-3.5" />
+          Open original
+        </a>
+      )}
+      <Legend />
     </div>
   )
 }

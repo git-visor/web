@@ -23,7 +23,14 @@ export function ObjectDatabase(): JSX.Element {
   const selectedObject = useAppSelector((state) => state.graph.selectedObject);
   const customData = useAppSelector((state) => state.graph.customData);
   const availableDatasets = useAppSelector((state) => state.graph.availableDatasets);
-  const isEmbed = useAppSelector((s) => s.graph.isEmbed);
+  const isEmbed = useAppSelector((s) => s.graph.isEmbed)
+
+  const openLinkUrl = useMemo(() => {
+    if (!isEmbed) return undefined
+    const url = new URL(window.location.href)
+    url.searchParams.delete('embed')   // keep everything else (url, etc.)
+    return url.toString()
+  }, [isEmbed])
 
   // Combine mock data and custom data
   useEffect(() => {
@@ -147,6 +154,7 @@ export function ObjectDatabase(): JSX.Element {
                 if (obj) dispatch(setSelectedObject(obj))
               }}
               visibilityMap={visibilityMap}
+              openLinkUrl={openLinkUrl}
             />
           </div>
         </div>
