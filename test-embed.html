@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Embed Width &amp; Height Showcase</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 16px;
+        background: #f3f4f6;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .controls button {
+        padding: 6px 14px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .controls button.active {
+        background: #2563eb;
+        color: #fff;
+        border-color: #2563eb;
+      }
+      .controls label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+      }
+      .dim-value {
+        font-weight: 600;
+        min-width: 48px;
+        display: inline-block;
+      }
+      iframe {
+        display: block;
+        transition: width 0.2s ease, height 0.2s ease;
+        background: #1e1e1e;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Example of Embed Usage</h1>
+
+    <div class="controls">
+      <span>Width:</span>
+      <button data-width="25%">25%</button>
+      <button data-width="50%" class="active">50%</button>
+      <button data-width="75%">75%</button>
+      <button data-width="100%">100%</button>
+
+      <label>
+        <input type="range" id="width-slider" min="200" max="1200" step="10" value="600" />
+        <span class="dim-value" id="width-value">600px</span>
+      </label>
+    </div>
+
+    <div class="controls">
+      <span>Height:</span>
+      <!-- <button data-height="300">300</button>
+      <button data-height="450">450</button>
+      <button data-height="600" class="active">600</button>
+      <button data-height="800">800</button> -->
+
+      <label>
+        <input type="range" id="height-slider" min="200" max="1000" step="10" value="600" />
+        <span class="dim-value" id="height-value">600px</span>
+      </label>
+    </div>
+
+    <iframe
+      id="gitvisor"
+      title="Git-Visor Embed"
+      src="./?embed=1&url=https%3A%2F%2Fdamithc.github.io%2Fgit-visor-json-files%2Fsamplerepo-company.json"
+      width="600"
+      height="600"
+      style="border:0">
+    </iframe>
+
+    <script>
+      const iframe = document.getElementById('gitvisor')
+
+      function setupDimension(dimension) {
+        const slider = document.getElementById(dimension + '-slider')
+        const value = document.getElementById(dimension + '-value')
+        const buttons = document.querySelectorAll('.controls button[data-' + dimension + ']')
+
+        // Preset buttons
+        buttons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            buttons.forEach((b) => b.classList.remove('active'))
+            btn.classList.add('active')
+            const newValue = btn.dataset[dimension] // e.g. "50%" or "600"
+            iframe.style[dimension] = newValue
+            value.textContent = newValue
+          })
+        })
+
+        // Slider (pixel values)
+        slider.addEventListener('input', () => {
+          buttons.forEach((b) => b.classList.remove('active'))
+          const px = slider.value + 'px'
+          iframe.style[dimension] = px
+          value.textContent = px
+        })
+      }
+
+      setupDimension('width')
+      setupDimension('height')
+    </script>
+  </body>
+</html>

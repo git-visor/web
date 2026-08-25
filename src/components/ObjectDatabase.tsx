@@ -23,6 +23,15 @@ export function ObjectDatabase(): JSX.Element {
   const selectedObject = useAppSelector((state) => state.graph.selectedObject);
   const customData = useAppSelector((state) => state.graph.customData);
   const availableDatasets = useAppSelector((state) => state.graph.availableDatasets);
+  const isEmbed = useAppSelector((s) => s.graph.isEmbed)
+
+  const openLinkUrl = useMemo(() => {
+    if (!isEmbed) return undefined
+    const url = new URL(window.location.href)
+    url.searchParams.delete('embed')   // keep everything else (url, etc.)
+    return url.toString()
+  }, [isEmbed])
+
   // Combine mock data and custom data
   useEffect(() => {
     const combinedDatasets = customData ? [...mockDataList, customData] : mockDataList
@@ -124,13 +133,15 @@ export function ObjectDatabase(): JSX.Element {
       </div>
     )
   }
-
+  
   return (
     <div className="flex-1 flex bg-[#1e1e1e] overflow-hidden h-full">
       <div className="flex-1 border-r border-gray-700 flex flex-col overflow-hidden relative">
-        <GraphConfig
-          objectCounts={objectCounts}
-        />
+        {!isEmbed && (
+          <GraphConfig
+            objectCounts={objectCounts}
+          />
+        )}
         <div className="flex-1 relative">
           <div
             className={`absolute inset-0 overflow-hidden p-0`}
@@ -143,6 +154,7 @@ export function ObjectDatabase(): JSX.Element {
                 if (obj) dispatch(setSelectedObject(obj))
               }}
               visibilityMap={visibilityMap}
+              openLinkUrl={openLinkUrl}
             />
           </div>
         </div>
