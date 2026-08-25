@@ -157,10 +157,10 @@ export function GraphConfig({ objectCounts }: GraphConfigProps): JSX.Element {
     const params = new URLSearchParams(window.location.search)
     const url = params.get('url')
     const embed = params.get('embed') === '1'
-    dispatch(setIsEmbed(embed))
 
     if (isFirstLoad.current) {
       isFirstLoad.current = false
+      dispatch(setIsEmbed(embed))
       if (url && url !== urlInput) {
         dispatch(setUrlInput(url))
         loadFromUrl(url)

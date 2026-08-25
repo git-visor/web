@@ -65,7 +65,7 @@ const graphSlice = createSlice({
       state.currentBranch = action.payload;
     },
     setIsEmbed(state, action: PayloadAction<boolean>) {
-      state.isEmbed = action.payload
+      state.isEmbed = action.payload;
     }
   },
 });

@@ -78,15 +78,16 @@
     </div>
 
     <iframe
-      id="gitgraph"
-      src="http://localhost:5173/?embed=1&url=https%3A%2F%2Fdamithc.github.io%2Fgit-visor-json-files%2Fsamplerepo-company.json"
+      id="gitvisor"
+      title="Git-Visor Embed"
+      src="./?embed=1&url=https%3A%2F%2Fdamithc.github.io%2Fgit-visor-json-files%2Fsamplerepo-company.json"
       width="600"
       height="600"
       style="border:0">
     </iframe>
 
     <script>
-      const iframe = document.getElementById('gitgraph')
+      const iframe = document.getElementById('gitvisor')
 
       function setupDimension(dimension) {
         const slider = document.getElementById(dimension + '-slider')

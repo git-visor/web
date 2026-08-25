@@ -23,7 +23,7 @@ export function ObjectDatabase(): JSX.Element {
   const selectedObject = useAppSelector((state) => state.graph.selectedObject);
   const customData = useAppSelector((state) => state.graph.customData);
   const availableDatasets = useAppSelector((state) => state.graph.availableDatasets);
-  const isEmbed = useAppSelector((s) => s.graph.isEmbed)
+  const isEmbed = useAppSelector((s) => s.graph.isEmbed);
 
   // Combine mock data and custom data
   useEffect(() => {
